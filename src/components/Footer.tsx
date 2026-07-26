@@ -5,7 +5,7 @@ export default function Footer() {
         SHADOW
       </p>
       <p className="mt-2 text-xs text-text-muted/70">
-        © {new Date().getFullYear()} Shadow —
+        © {new Date().getFullYear()} Shadow —--
         réservés.
       </p>
     </footer>
