@@ -8,7 +8,8 @@ function formatPrice(value: number) {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { name, category, price, compareAtPrice, inStock, description } = product;
+  const { nom, prix, taille, couleur, stock, description } = product;
+  const inStock = stock > 0;
 
   return (
     <article
@@ -18,7 +19,6 @@ export default function ProductCard({ product }: { product: Product }) {
           : "border-white/5 bg-surface/60 grayscale"
       }`}
     >
-      {/* Zone "visuel" du produit — silhouette générique en attendant les vraies photos */}
       <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-gradient-to-b from-[#181a1f] to-[#0e0f13]">
         <svg
           viewBox="0 0 100 100"
@@ -36,7 +36,6 @@ export default function ProductCard({ product }: { product: Product }) {
           />
         </svg>
 
-        {/* Badge disponibilité */}
         <div className="absolute left-3 top-3">
           {inStock ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] tracking-wide text-lamp-soft backdrop-blur-sm">
@@ -50,33 +49,21 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-
-        {compareAtPrice && inStock && (
-          <span className="absolute right-3 top-3 rounded-full bg-lamp px-2.5 py-1 text-[11px] font-medium text-void">
-            Promo
-          </span>
-        )}
       </div>
 
-      {/* Infos produit */}
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         <span className="text-[11px] uppercase tracking-[0.2em] text-text-muted">
-          {category}
+          {couleur} · {taille}
         </span>
         <h3 className="font-display text-xl leading-tight tracking-wide text-text-primary">
-          {name}
+          {nom}
         </h3>
         <p className="mb-2 line-clamp-2 text-sm text-text-muted">{description}</p>
 
         <div className="mt-auto flex items-center gap-2 pt-2">
           <span className="text-base font-medium text-text-primary">
-            {formatPrice(price)}
+            {formatPrice(prix)}
           </span>
-          {compareAtPrice && (
-            <span className="text-sm text-text-muted line-through">
-              {formatPrice(compareAtPrice)}
-            </span>
-          )}
         </div>
 
         <button
