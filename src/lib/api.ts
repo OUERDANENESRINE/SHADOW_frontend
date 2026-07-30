@@ -51,3 +51,62 @@ export async function logout() {
 export async function getMe() {
   return apiFetch("/auth/me", { method: "POST" });
 }
+
+export async function createProduct(data: {
+  nom: string;
+  description?: string;
+  prix: number;
+  taille?: string;
+  couleur?: string;
+  stock?: number;
+  imageUrl?: string;
+}) {
+  return apiFetch("/products", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateProduct(id: number, data: Partial<{
+  nom: string;
+  description: string;
+  prix: number;
+  taille: string;
+  couleur: string;
+  stock: number;
+  imageUrl: string;
+}>) {
+  return apiFetch(`/products/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteProduct(id: number) {
+  return apiFetch(`/products/${id}`, { method: "DELETE" });
+}
+
+export async function fetchOrders() {
+  return apiFetch("/orders");
+}
+
+export async function updateOrderStatus(id: number, statut: string) {
+  return apiFetch(`/orders/${id}/statut`, {
+    method: "PATCH",
+    body: JSON.stringify({ statut }),
+  });
+}
+
+export async function fetchNotifications() {
+  return apiFetch("/notifications");
+}
+
+export async function markNotificationRead(id: number) {
+  return apiFetch(`/notifications/${id}/lue`, { method: "PATCH" });
+}
+export async function createWalkInOrder(clientNom: string, items: { productId: number; quantite: number }[]) {
+  return apiFetch("/orders/walk-in", {
+    method: "POST",
+    body: JSON.stringify({ clientNom, items }),
+  });
+}

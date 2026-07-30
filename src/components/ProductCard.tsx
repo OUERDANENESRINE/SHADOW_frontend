@@ -1,3 +1,4 @@
+import { getColorHex } from "@/lib/variants";
 import { Product } from "@/types/product";
 
 function formatPrice(value: number) {
@@ -52,9 +53,21 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-text-muted">
-          {couleur} · {taille}
-        </span>
+        <div className="flex items-center gap-2">
+  <span
+    className="h-3.5 w-3.5 rounded-full border border-white/20"
+    style={{ backgroundColor: getColorHex(couleur) }}
+    title={couleur}
+  />
+  <span className="text-[11px] uppercase tracking-[0.2em] text-text-muted">
+    {couleur}
+  </span>
+  {taille && (
+    <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] tracking-wide text-text-muted">
+      {taille}
+    </span>
+  )}
+</div>
         <h3 className="font-display text-xl leading-tight tracking-wide text-text-primary">
           {nom}
         </h3>
