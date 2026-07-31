@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
   const { user, logout, loading } = useAuth();
-
+  const { totalItems } = useCart();
   return (
     <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
       <Link href="/" className="font-display text-lg tracking-[0.3em] text-text-primary">
@@ -45,6 +46,15 @@ export default function Header() {
             )}
           </>
         )}
+
+        <Link href="/panier" className="relative text-sm tracking-wide text-text-muted transition hover:text-lamp-soft">
+  Panier
+  {totalItems > 0 && (
+    <span className="absolute -right-3 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-lamp text-[10px] font-medium text-void">
+      {totalItems}
+    </span>
+  )}
+</Link>
 
         <a
           href="https://instagram.com"

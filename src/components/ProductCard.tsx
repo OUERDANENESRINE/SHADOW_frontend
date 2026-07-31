@@ -1,5 +1,9 @@
-import { getColorHex } from "@/lib/variants";
+"use client";
+
+import { useState } from "react";
 import { Product } from "@/types/product";
+import { getColorHex } from "@/lib/variants";
+import { useCart } from "@/context/CartContext";
 
 function formatPrice(value: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -9,8 +13,20 @@ function formatPrice(value: number) {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { nom, prix, taille, couleur, stock, description } = product;
+  const { nom, prix, tailles, couleurs, stock, description } = product;
   const inStock = stock > 0;
+  const { addItem } = useCart();
+
+  const [selectedTaille, setSelectedTaille] = useState(tailles?.[0] || "");
+  const [selectedCouleur, setSelectedCouleur] = useState(couleurs?.[0] || "");
+  const [added, setAdded] = useState(false);
+
+  function handleAddToCart() {
+    if (!selectedTaille || !selectedCouleur) return;
+    addItem(product, selectedTaille, selectedCouleur, 1);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  }
 
   return (
     <article
@@ -52,26 +68,57 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <div className="flex items-center gap-2">
-  <span
-    className="h-3.5 w-3.5 rounded-full border border-white/20"
-    style={{ backgroundColor: getColorHex(couleur) }}
-    title={couleur}
-  />
-  <span className="text-[11px] uppercase tracking-[0.2em] text-text-muted">
-    {couleur}
-  </span>
-  {taille && (
-    <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] tracking-wide text-text-muted">
-      {taille}
-    </span>
-  )}
-</div>
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="font-display text-xl leading-tight tracking-wide text-text-primary">
           {nom}
         </h3>
-        <p className="mb-2 line-clamp-2 text-sm text-text-muted">{description}</p>
+        <p className="line-clamp-2 text-sm text-text-muted">{description}</p>
+
+        {inStock && couleurs && couleurs.length > 0 && (
+          <div>
+            <span className="mb-1 block text-[11px] uppercase tracking-wide text-text-muted">
+              Couleur
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {couleurs.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setSelectedCouleur(c)}
+                  title={c}
+                  className={`h-6 w-6 rounded-full border-2 transition ${
+                    selectedCouleur === c ? "border-lamp" : "border-white/20"
+                  }`}
+                  style={{ backgroundColor: getColorHex(c) }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {inStock && tailles && tailles.length > 0 && (
+          <div>
+            <span className="mb-1 block text-[11px] uppercase tracking-wide text-text-muted">
+              Taille
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {tailles.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setSelectedTaille(t)}
+                  className={`h-7 min-w-7 rounded border px-1.5 text-xs font-medium transition ${
+                    selectedTaille === t
+                      ? "border-lamp bg-lamp/15 text-lamp-soft"
+                      : "border-white/15 text-text-muted hover:border-white/30"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-auto flex items-center gap-2 pt-2">
           <span className="text-base font-medium text-text-primary">
@@ -80,14 +127,17 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         <button
-          disabled={!inStock}
-          className={`mt-3 w-full rounded-full py-2.5 text-sm tracking-wide transition ${
-            inStock
-              ? "bg-lamp text-void hover:bg-lamp-soft cursor-pointer"
-              : "cursor-not-allowed bg-white/5 text-text-muted"
+          onClick={handleAddToCart}
+          disabled={!inStock || !selectedTaille || !selectedCouleur}
+          className={`mt-1 w-full rounded-full py-2.5 text-sm tracking-wide transition ${
+            !inStock
+              ? "cursor-not-allowed bg-white/5 text-text-muted"
+              : added
+                ? "bg-green-600 text-white"
+                : "cursor-pointer bg-lamp text-void hover:bg-lamp-soft"
           }`}
         >
-          {inStock ? "Ajouter au panier" : "Indisponible"}
+          {!inStock ? "Indisponible" : added ? "Ajouté ✓" : "Ajouter au panier"}
         </button>
       </div>
     </article>

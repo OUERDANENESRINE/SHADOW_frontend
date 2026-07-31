@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 
 export const metadata: Metadata = {
   title: "Shadow — Boutique homme",
@@ -37,7 +38,7 @@ export default function RootLayout({
         }
         className="antialiased"
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>
       </body>
     </html>
   );

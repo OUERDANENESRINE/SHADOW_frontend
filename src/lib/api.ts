@@ -110,3 +110,10 @@ export async function createWalkInOrder(clientNom: string, items: { productId: n
     body: JSON.stringify({ clientNom, items }),
   });
 }
+
+export async function createOrder(items: { productId: number; quantite: number }[]) {
+  return apiFetch("/orders", {
+    method: "POST",
+    body: JSON.stringify({ items }),
+  });
+}

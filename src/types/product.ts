@@ -3,8 +3,8 @@ export interface Product {
   nom: string;
   description: string;
   prix: number;
-  taille: string;
-  couleur: string;
+  tailles: string[];
+  couleurs: string[];
   stock: number;
   imageUrl: string | null;
   createdAt: string;
