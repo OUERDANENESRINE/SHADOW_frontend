@@ -29,7 +29,7 @@ export default function PanierPage() {
     setError("");
     try {
       const orderItems = items.map((i) => ({
-        productId: i.product.id,
+        variantId: i.variant.id,
         quantite: i.quantite,
       }));
       await createOrder(orderItems);
@@ -73,15 +73,16 @@ export default function PanierPage() {
                       <div className="mt-1 flex items-center gap-2 text-xs text-text-muted">
                         <span
                           className="h-3 w-3 rounded-full border border-white/20"
-                          style={{ backgroundColor: getColorHex(item.couleur) }}
+                          style={{ backgroundColor: getColorHex(item.variant.couleur) }}
                         />
-                        {item.couleur} · {item.taille}
+                        {item.variant.couleur} · {item.variant.taille}
                       </div>
                     </div>
 
                     <input
                       type="number"
                       min={1}
+                      max={item.variant.stock}
                       value={item.quantite}
                       onChange={(e) => updateQuantity(index, Number(e.target.value))}
                       className="w-16 rounded-lg border border-white/10 bg-void px-2 py-1.5 text-center text-text-primary outline-none focus:border-lamp/50"

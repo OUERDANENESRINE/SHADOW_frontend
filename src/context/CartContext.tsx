@@ -1,18 +1,17 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Product } from "@/types/product";
+import { Product, ProductVariant } from "@/types/product";
 
 export interface CartItem {
   product: Product;
-  taille: string;
-  couleur: string;
+  variant: ProductVariant;
   quantite: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, taille: string, couleur: string, quantite: number) => void;
+  addItem: (product: Product, variant: ProductVariant, quantite: number) => void;
   removeItem: (index: number) => void;
   updateQuantity: (index: number, quantite: number) => void;
   clearCart: () => void;
@@ -45,17 +44,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, hydrated]);
 
-  function addItem(product: Product, taille: string, couleur: string, quantite: number) {
+  function addItem(product: Product, variant: ProductVariant, quantite: number) {
     setItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (i) => i.product.id === product.id && i.taille === taille && i.couleur === couleur,
-      );
+      const existingIndex = prev.findIndex((i) => i.variant.id === variant.id);
       if (existingIndex !== -1) {
         const updated = [...prev];
         updated[existingIndex].quantite += quantite;
         return updated;
       }
-      return [...prev, { product, taille, couleur, quantite }];
+      return [...prev, { product, variant, quantite }];
     });
   }
 

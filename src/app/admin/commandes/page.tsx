@@ -22,7 +22,7 @@ const statutStyle: Record<OrderStatus, string> = {
 };
 
 interface CartLine {
-  productId: number;
+  variantId: number;
   quantite: number;
 }
 
@@ -34,7 +34,7 @@ export default function AdminCommandesPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [clientNom, setClientNom] = useState("");
-  const [lines, setLines] = useState<CartLine[]>([{ productId: 0, quantite: 1 }]);
+  const [lines, setLines] = useState<CartLine[]>([{ variantId: 0, quantite: 1 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,20 +62,20 @@ export default function AdminCommandesPage() {
   }
 
   function addLine() {
-    setLines([...lines, { productId: 0, quantite: 1 }]);
+    setLines([...lines, { variantId: 0, quantite: 1 }]);
   }
 
   function removeLine(index: number) {
     setLines(lines.filter((_, i) => i !== index));
   }
 
-  function updateLine(index: number, field: "productId" | "quantite", value: number) {
+  function updateLine(index: number, field: "variantId" | "quantite", value: number) {
     setLines(lines.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
   }
 
   function resetForm() {
     setClientNom("");
-    setLines([{ productId: 0, quantite: 1 }]);
+    setLines([{ variantId: 0, quantite: 1 }]);
     setShowForm(false);
     setError("");
   }
@@ -84,9 +84,9 @@ export default function AdminCommandesPage() {
     e.preventDefault();
     setError("");
 
-    const validLines = lines.filter((l) => l.productId > 0 && l.quantite > 0);
+    const validLines = lines.filter((l) => l.variantId > 0 && l.quantite > 0);
     if (validLines.length === 0) {
-      setError("Ajoutez au moins un produit valide");
+      setError("Ajoutez au moins une variante valide");
       return;
     }
 
@@ -144,20 +144,22 @@ export default function AdminCommandesPage() {
             </div>
 
             <div className="mb-4 flex flex-col gap-2">
-              <label className="mb-1 block text-sm text-text-muted">Produits</label>
+              <label className="mb-1 block text-sm text-text-muted">Produits (variante précise)</label>
               {lines.map((line, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <select
-                    value={line.productId}
-                    onChange={(e) => updateLine(i, "productId", Number(e.target.value))}
+                    value={line.variantId}
+                    onChange={(e) => updateLine(i, "variantId", Number(e.target.value))}
                     className="flex-1 rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
                   >
-                    <option value={0}>Sélectionner un produit</option>
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.nom} — {p.prix} € (stock: {p.stock})
-                      </option>
-                    ))}
+                    <option value={0}>Sélectionner une variante</option>
+                    {products.flatMap((p) =>
+                      p.variants.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {p.nom} — {v.couleur}/{v.taille} ({v.stock} en stock)
+                        </option>
+                      )),
+                    )}
                   </select>
                   <input
                     type="number"
@@ -182,7 +184,7 @@ export default function AdminCommandesPage() {
                 onClick={addLine}
                 className="mt-1 w-fit text-sm text-lamp-soft hover:underline"
               >
-                + Ajouter un produit
+                + Ajouter une ligne
               </button>
             </div>
 
@@ -245,7 +247,8 @@ export default function AdminCommandesPage() {
                     <ul className="mb-4 flex flex-col gap-1 text-sm text-text-muted">
                       {order.items.map((item) => (
                         <li key={item.id}>
-                          {item.quantite} × {item.product?.nom} — {item.prixUnitaire} €
+                          {item.quantite} × {item.variant?.product?.nom} (
+                          {item.variant?.couleur}/{item.variant?.taille}) — {item.prixUnitaire} €
                         </li>
                       ))}
                     </ul>

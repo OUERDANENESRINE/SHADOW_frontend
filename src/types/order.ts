@@ -1,4 +1,4 @@
-import { Product } from "./product";
+import { Product, ProductVariant } from "./product";
 
 export type OrderStatus = "en_attente" | "validee" | "expediee" | "annulee";
 
@@ -6,7 +6,7 @@ export interface OrderItem {
   id: number;
   quantite: number;
   prixUnitaire: number;
-  product: Product;
+  variant: ProductVariant & { product: Product };
 }
 
 export interface Order {
@@ -15,11 +15,7 @@ export interface Order {
   total: number;
   createdAt: string;
   clientNom?: string | null;
-  user: {
-    id: number;
-    nom: string;
-    email: string;
-  } | null;
+  user: { id: number; nom: string; email: string } | null;
   items: OrderItem[];
 }
 

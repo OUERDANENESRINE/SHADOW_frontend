@@ -3,7 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 async function apiFetch(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
-    credentials: "include", // essentiel : envoie/reçoit les cookies cross-origin
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -18,6 +18,8 @@ async function apiFetch(path: string, options: RequestInit = {}) {
   return res.json();
 }
 
+// --- Produits ---
+
 export async function fetchProducts() {
   const res = await fetch(`${API_URL}/products`, { cache: "no-store" });
   if (!res.ok) throw new Error("Impossible de récupérer les produits");
@@ -29,6 +31,40 @@ export async function fetchProduct(id: number) {
   if (!res.ok) throw new Error("Produit introuvable");
   return res.json();
 }
+
+interface ProductVariantInput {
+  taille: string;
+  couleur: string;
+  stock: number;
+}
+
+interface ProductInput {
+  nom: string;
+  description?: string;
+  prix: number;
+  imageUrl?: string;
+  variants: ProductVariantInput[];
+}
+
+export async function createProduct(data: ProductInput) {
+  return apiFetch("/products", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateProduct(id: number, data: Partial<ProductInput>) {
+  return apiFetch(`/products/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteProduct(id: number) {
+  return apiFetch(`/products/${id}`, { method: "DELETE" });
+}
+
+// --- Auth ---
 
 export async function login(email: string, motDePasse: string) {
   return apiFetch("/auth/login", {
@@ -52,38 +88,23 @@ export async function getMe() {
   return apiFetch("/auth/me", { method: "POST" });
 }
 
-export async function createProduct(data: {
-  nom: string;
-  description?: string;
-  prix: number;
-  taille?: string;
-  couleur?: string;
-  stock?: number;
-  imageUrl?: string;
-}) {
-  return apiFetch("/products", {
+// --- Commandes ---
+
+export async function createOrder(items: { variantId: number; quantite: number }[]) {
+  return apiFetch("/orders", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ items }),
   });
 }
 
-export async function updateProduct(id: number, data: Partial<{
-  nom: string;
-  description: string;
-  prix: number;
-  taille: string;
-  couleur: string;
-  stock: number;
-  imageUrl: string;
-}>) {
-  return apiFetch(`/products/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(data),
+export async function createWalkInOrder(
+  clientNom: string,
+  items: { variantId: number; quantite: number }[],
+) {
+  return apiFetch("/orders/walk-in", {
+    method: "POST",
+    body: JSON.stringify({ clientNom, items }),
   });
-}
-
-export async function deleteProduct(id: number) {
-  return apiFetch(`/products/${id}`, { method: "DELETE" });
 }
 
 export async function fetchOrders() {
@@ -97,6 +118,8 @@ export async function updateOrderStatus(id: number, statut: string) {
   });
 }
 
+// --- Notifications ---
+
 export async function fetchNotifications() {
   return apiFetch("/notifications");
 }
@@ -104,16 +127,6 @@ export async function fetchNotifications() {
 export async function markNotificationRead(id: number) {
   return apiFetch(`/notifications/${id}/lue`, { method: "PATCH" });
 }
-export async function createWalkInOrder(clientNom: string, items: { productId: number; quantite: number }[]) {
-  return apiFetch("/orders/walk-in", {
-    method: "POST",
-    body: JSON.stringify({ clientNom, items }),
-  });
-}
-
-export async function createOrder(items: { productId: number; quantite: number }[]) {
-  return apiFetch("/orders", {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
+export async function fetchMyOrders(userId: number) {
+  return apiFetch(`/orders/user/${userId}`);
 }

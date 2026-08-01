@@ -1,29 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { Product } from "@/types/product";
+import { useMemo, useState } from "react";
+import { Product, ProductVariant } from "@/types/product";
 import { getColorHex } from "@/lib/variants";
 import { useCart } from "@/context/CartContext";
 
 function formatPrice(value: number) {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { nom, prix, tailles, couleurs, stock, description } = product;
-  const inStock = stock > 0;
+  const { nom, prix, description, variants = [] } = product;
   const { addItem } = useCart();
-
-  const [selectedTaille, setSelectedTaille] = useState(tailles?.[0] || "");
-  const [selectedCouleur, setSelectedCouleur] = useState(couleurs?.[0] || "");
   const [added, setAdded] = useState(false);
 
+  const couleursDisponibles = useMemo(
+    () => Array.from(new Set(variants.map((v: ProductVariant) => v.couleur))),
+    [variants],
+  );
+
+  const [selectedCouleur, setSelectedCouleur] = useState(couleursDisponibles[0] || "");
+
+  const taillesPourCouleur = useMemo(
+    () => variants.filter((v: ProductVariant) => v.couleur === selectedCouleur),
+    [variants, selectedCouleur],
+  );
+
+  const [selectedTaille, setSelectedTaille] = useState(taillesPourCouleur[0]?.taille || "");
+
+  const selectedVariant = variants.find(
+    (v: ProductVariant) => v.couleur === selectedCouleur && v.taille === selectedTaille,
+  );
+
+  const hasAnyStock = variants.some((v: ProductVariant) => v.stock > 0);
+  const variantInStock = (selectedVariant?.stock || 0) > 0;
+
+  function handleColorChange(couleur: string) {
+    setSelectedCouleur(couleur);
+    const firstAvailable = variants.find((v: ProductVariant) => v.couleur === couleur);
+    setSelectedTaille(firstAvailable?.taille || "");
+  }
+
   function handleAddToCart() {
-    if (!selectedTaille || !selectedCouleur) return;
-    addItem(product, selectedTaille, selectedCouleur, 1);
+    if (!selectedVariant || selectedVariant.stock <= 0) return;
+    addItem(product, selectedVariant, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   }
@@ -31,7 +51,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <article
       className={`group relative flex flex-col overflow-hidden rounded-lg border transition-all duration-300 ${
-        inStock
+        hasAnyStock
           ? "border-white/10 bg-surface hover:border-lamp/50 hover:shadow-[0_0_40px_-10px_rgba(244,167,60,0.35)]"
           : "border-white/5 bg-surface/60 grayscale"
       }`}
@@ -40,7 +60,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <svg
           viewBox="0 0 100 100"
           className={`h-16 w-16 transition-opacity ${
-            inStock ? "opacity-70 group-hover:opacity-90" : "opacity-30"
+            hasAnyStock ? "opacity-70 group-hover:opacity-90" : "opacity-30"
           }`}
           aria-hidden="true"
         >
@@ -54,7 +74,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </svg>
 
         <div className="absolute left-3 top-3">
-          {inStock ? (
+          {hasAnyStock ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] tracking-wide text-lamp-soft backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-lamp shadow-[0_0_6px_2px_rgba(244,167,60,0.7)]" />
               Disponible
@@ -74,46 +94,49 @@ export default function ProductCard({ product }: { product: Product }) {
         </h3>
         <p className="line-clamp-2 text-sm text-text-muted">{description}</p>
 
-        {inStock && couleurs && couleurs.length > 0 && (
+        {couleursDisponibles.length > 0 && (
           <div>
             <span className="mb-1 block text-[11px] uppercase tracking-wide text-text-muted">
               Couleur
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {couleurs.map((c) => (
+              {couleursDisponibles.map((c) => (
                 <button
-                  key={c}
+                  key={c as string}
                   type="button"
-                  onClick={() => setSelectedCouleur(c)}
-                  title={c}
+                  onClick={() => handleColorChange(c as string)}
+                  title={c as string}
                   className={`h-6 w-6 rounded-full border-2 transition ${
                     selectedCouleur === c ? "border-lamp" : "border-white/20"
                   }`}
-                  style={{ backgroundColor: getColorHex(c) }}
+                  style={{ backgroundColor: getColorHex(c as string) }}
                 />
               ))}
             </div>
           </div>
         )}
 
-        {inStock && tailles && tailles.length > 0 && (
+        {taillesPourCouleur.length > 0 && (
           <div>
             <span className="mb-1 block text-[11px] uppercase tracking-wide text-text-muted">
               Taille
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {tailles.map((t) => (
+              {taillesPourCouleur.map((v: ProductVariant) => (
                 <button
-                  key={t}
+                  key={v.id}
                   type="button"
-                  onClick={() => setSelectedTaille(t)}
+                  disabled={v.stock <= 0}
+                  onClick={() => setSelectedTaille(v.taille)}
                   className={`h-7 min-w-7 rounded border px-1.5 text-xs font-medium transition ${
-                    selectedTaille === t
-                      ? "border-lamp bg-lamp/15 text-lamp-soft"
-                      : "border-white/15 text-text-muted hover:border-white/30"
+                    v.stock <= 0
+                      ? "cursor-not-allowed border-white/5 text-text-muted/40 line-through"
+                      : selectedTaille === v.taille
+                        ? "border-lamp bg-lamp/15 text-lamp-soft"
+                        : "border-white/15 text-text-muted hover:border-white/30"
                   }`}
                 >
-                  {t}
+                  {v.taille}
                 </button>
               ))}
             </div>
@@ -121,23 +144,30 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
 
         <div className="mt-auto flex items-center gap-2 pt-2">
-          <span className="text-base font-medium text-text-primary">
-            {formatPrice(prix)}
-          </span>
+          <span className="text-base font-medium text-text-primary">{formatPrice(prix)}</span>
+          {selectedVariant && (
+            <span className="text-xs text-text-muted">
+              ({selectedVariant.stock} en stock)
+            </span>
+          )}
         </div>
 
         <button
           onClick={handleAddToCart}
-          disabled={!inStock || !selectedTaille || !selectedCouleur}
+          disabled={!selectedVariant || !variantInStock}
           className={`mt-1 w-full rounded-full py-2.5 text-sm tracking-wide transition ${
-            !inStock
+            !selectedVariant || !variantInStock
               ? "cursor-not-allowed bg-white/5 text-text-muted"
               : added
                 ? "bg-green-600 text-white"
                 : "cursor-pointer bg-lamp text-void hover:bg-lamp-soft"
           }`}
         >
-          {!inStock ? "Indisponible" : added ? "Ajouté ✓" : "Ajouter au panier"}
+          {!selectedVariant || !variantInStock
+            ? "Indisponible"
+            : added
+              ? "Ajouté ✓"
+              : "Ajouter au panier"}
         </button>
       </div>
     </article>
