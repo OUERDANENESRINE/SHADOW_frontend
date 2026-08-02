@@ -42,22 +42,16 @@ interface ProductInput {
   nom: string;
   description?: string;
   prix: number;
-  imageUrl?: string;
+  imageUrls?: string[];
   variants: ProductVariantInput[];
 }
 
 export async function createProduct(data: ProductInput) {
-  return apiFetch("/products", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  return apiFetch("/products", { method: "POST", body: JSON.stringify(data) });
 }
 
 export async function updateProduct(id: number, data: Partial<ProductInput>) {
-  return apiFetch(`/products/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
+  return apiFetch(`/products/${id}`, { method: "PATCH", body: JSON.stringify(data) });
 }
 
 export async function deleteProduct(id: number) {
@@ -67,10 +61,7 @@ export async function deleteProduct(id: number) {
 // --- Auth ---
 
 export async function login(email: string, motDePasse: string) {
-  return apiFetch("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, motDePasse }),
-  });
+  return apiFetch("/auth/login", { method: "POST", body: JSON.stringify({ email, motDePasse }) });
 }
 
 export async function register(nom: string, email: string, motDePasse: string) {
@@ -90,10 +81,19 @@ export async function getMe() {
 
 // --- Commandes ---
 
-export async function createOrder(items: { variantId: number; quantite: number }[]) {
+interface DeliveryInfo {
+  clientNom: string;
+  telephone: string;
+  adresse: string;
+}
+
+export async function createOrder(
+  delivery: DeliveryInfo,
+  items: { variantId: number; quantite: number }[],
+) {
   return apiFetch("/orders", {
     method: "POST",
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ ...delivery, items }),
   });
 }
 
@@ -111,11 +111,12 @@ export async function fetchOrders() {
   return apiFetch("/orders");
 }
 
+export async function fetchMyOrders(userId: number) {
+  return apiFetch(`/orders/user/${userId}`);
+}
+
 export async function updateOrderStatus(id: number, statut: string) {
-  return apiFetch(`/orders/${id}/statut`, {
-    method: "PATCH",
-    body: JSON.stringify({ statut }),
-  });
+  return apiFetch(`/orders/${id}/statut`, { method: "PATCH", body: JSON.stringify({ statut }) });
 }
 
 // --- Notifications ---
@@ -127,6 +128,22 @@ export async function fetchNotifications() {
 export async function markNotificationRead(id: number) {
   return apiFetch(`/notifications/${id}/lue`, { method: "PATCH" });
 }
-export async function fetchMyOrders(userId: number) {
-  return apiFetch(`/orders/user/${userId}`);
+
+export async function uploadImages(files: File[]): Promise<string[]> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+
+  const res = await fetch(`${API_URL}/uploads`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "Erreur lors de l'upload" }));
+    throw new Error(error.message || "Erreur lors de l'upload");
+  }
+
+  const data = await res.json();
+  return data.urls.map((url: string) => `${API_URL}${url}`);
 }

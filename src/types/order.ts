@@ -15,6 +15,8 @@ export interface Order {
   total: number;
   createdAt: string;
   clientNom?: string | null;
+  telephone?: string | null;
+  adresse?: string | null;
   user: { id: number; nom: string; email: string } | null;
   items: OrderItem[];
 }

@@ -10,7 +10,7 @@ export interface Product {
   nom: string;
   description: string;
   prix: number;
-  imageUrl: string | null;
+  imageUrls: string[];
   variants: ProductVariant[];
   createdAt: string;
   updatedAt: string;

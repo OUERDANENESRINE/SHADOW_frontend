@@ -41,10 +41,7 @@ export default function AdminCommandesPage() {
   async function load() {
     setLoading(true);
     try {
-      const [ordersData, productsData] = await Promise.all([
-        fetchOrders(),
-        fetchProducts(),
-      ]);
+      const [ordersData, productsData] = await Promise.all([fetchOrders(), fetchProducts()]);
       setOrders(ordersData);
       setProducts(productsData);
     } finally {
@@ -106,9 +103,7 @@ export default function AdminCommandesPage() {
     <ProtectedRoute requireAdmin>
       <AdminLayout>
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-3xl tracking-wide text-text-primary">
-            Commandes
-          </h1>
+          <h1 className="font-display text-3xl tracking-wide text-text-primary">Commandes</h1>
           <button
             onClick={() => setShowForm(!showForm)}
             className="rounded-full bg-lamp px-5 py-2 text-sm font-medium text-void transition hover:bg-lamp-soft"
@@ -122,9 +117,7 @@ export default function AdminCommandesPage() {
             onSubmit={handleCreateOrder}
             className="mb-8 rounded-lg border border-white/10 bg-surface p-6"
           >
-            <h2 className="mb-4 font-display text-xl text-text-primary">
-              Commande en boutique
-            </h2>
+            <h2 className="mb-4 font-display text-xl text-text-primary">Commande en boutique</h2>
 
             {error && (
               <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400">
@@ -144,7 +137,9 @@ export default function AdminCommandesPage() {
             </div>
 
             <div className="mb-4 flex flex-col gap-2">
-              <label className="mb-1 block text-sm text-text-muted">Produits (variante précise)</label>
+              <label className="mb-1 block text-sm text-text-muted">
+                Produits (variante précise)
+              </label>
               {lines.map((line, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <select
@@ -223,11 +218,11 @@ export default function AdminCommandesPage() {
                   className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="font-display text-lg text-text-primary">
-                      #{order.id}
-                    </span>
+                    <span className="font-display text-lg text-text-primary">#{order.id}</span>
                     <span className="text-sm text-text-muted">
-                      {order.user ? order.user.nom || order.user.email : `${order.clientNom} (en boutique)`}
+                      {order.user
+                        ? order.user.nom || order.user.email
+                        : `${order.clientNom} (en boutique)`}
                     </span>
                     <span className="text-xs text-text-muted">
                       {new Date(order.createdAt).toLocaleDateString("fr-FR")}
@@ -235,7 +230,9 @@ export default function AdminCommandesPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${statutStyle[order.statut]}`}>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${statutStyle[order.statut]}`}
+                    >
                       {STATUTS.find((s) => s.value === order.statut)?.label}
                     </span>
                     <span className="text-text-primary">{order.total} €</span>
@@ -244,6 +241,29 @@ export default function AdminCommandesPage() {
 
                 {expandedId === order.id && (
                   <div className="border-t border-white/10 px-5 py-4">
+                    {(order.clientNom || order.telephone || order.adresse) && (
+                      <div className="mb-4 rounded-lg border border-white/10 bg-void/50 p-3 text-sm">
+                        {order.clientNom && (
+                          <p className="text-text-primary">
+                            <span className="text-text-muted">Nom : </span>
+                            {order.clientNom}
+                          </p>
+                        )}
+                        {order.telephone && (
+                          <p className="text-text-primary">
+                            <span className="text-text-muted">Téléphone : </span>
+                            {order.telephone}
+                          </p>
+                        )}
+                        {order.adresse && (
+                          <p className="text-text-primary">
+                            <span className="text-text-muted">Adresse : </span>
+                            {order.adresse}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     <ul className="mb-4 flex flex-col gap-1 text-sm text-text-muted">
                       {order.items.map((item) => (
                         <li key={item.id}>
@@ -258,7 +278,9 @@ export default function AdminCommandesPage() {
                     </label>
                     <select
                       value={order.statut}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                      onChange={(e) =>
+                        handleStatusChange(order.id, e.target.value as OrderStatus)
+                      }
                       className="rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
                     >
                       {STATUTS.map((s) => (

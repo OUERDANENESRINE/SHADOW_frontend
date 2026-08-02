@@ -10,34 +10,37 @@ function formatPrice(value: number) {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { nom, prix, description, variants = [] } = product;
+  const { nom, prix, description, variants, imageUrls } = product;
+  const safeVariants = variants || [];
+  const safeImageUrls = imageUrls || [];
+
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
   const couleursDisponibles = useMemo(
-    () => Array.from(new Set(variants.map((v: ProductVariant) => v.couleur))),
-    [variants],
+    () => Array.from(new Set(safeVariants.map((v: ProductVariant) => v.couleur))),
+    [safeVariants],
   );
 
   const [selectedCouleur, setSelectedCouleur] = useState(couleursDisponibles[0] || "");
 
   const taillesPourCouleur = useMemo(
-    () => variants.filter((v: ProductVariant) => v.couleur === selectedCouleur),
-    [variants, selectedCouleur],
+    () => safeVariants.filter((v: ProductVariant) => v.couleur === selectedCouleur),
+    [safeVariants, selectedCouleur],
   );
 
   const [selectedTaille, setSelectedTaille] = useState(taillesPourCouleur[0]?.taille || "");
 
-  const selectedVariant = variants.find(
+  const selectedVariant = safeVariants.find(
     (v: ProductVariant) => v.couleur === selectedCouleur && v.taille === selectedTaille,
   );
 
-  const hasAnyStock = variants.some((v: ProductVariant) => v.stock > 0);
+  const hasAnyStock = safeVariants.some((v: ProductVariant) => v.stock > 0);
   const variantInStock = (selectedVariant?.stock || 0) > 0;
 
   function handleColorChange(couleur: string) {
     setSelectedCouleur(couleur);
-    const firstAvailable = variants.find((v: ProductVariant) => v.couleur === couleur);
+    const firstAvailable = safeVariants.find((v: ProductVariant) => v.couleur === couleur);
     setSelectedTaille(firstAvailable?.taille || "");
   }
 
@@ -57,21 +60,32 @@ export default function ProductCard({ product }: { product: Product }) {
       }`}
     >
       <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-gradient-to-b from-[#181a1f] to-[#0e0f13]">
-        <svg
-          viewBox="0 0 100 100"
-          className={`h-16 w-16 transition-opacity ${
-            hasAnyStock ? "opacity-70 group-hover:opacity-90" : "opacity-30"
-          }`}
-          aria-hidden="true"
-        >
-          <path
-            d="M35 15 L45 10 L55 10 L65 15 L78 25 L70 35 L62 30 L62 90 L38 90 L38 30 L30 35 L22 25 Z"
-            fill="none"
-            stroke="#F4A73C"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
+        {safeImageUrls.length > 0 ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={safeImageUrls[0]}
+            alt={nom}
+            className={`h-full w-full object-cover transition-opacity ${
+              hasAnyStock ? "opacity-100" : "opacity-40 grayscale"
+            }`}
           />
-        </svg>
+        ) : (
+          <svg
+            viewBox="0 0 100 100"
+            className={`h-16 w-16 transition-opacity ${
+              hasAnyStock ? "opacity-70 group-hover:opacity-90" : "opacity-30"
+            }`}
+            aria-hidden="true"
+          >
+            <path
+              d="M35 15 L45 10 L55 10 L65 15 L78 25 L70 35 L62 30 L62 90 L38 90 L38 30 L30 35 L22 25 Z"
+              fill="none"
+              stroke="#F4A73C"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
 
         <div className="absolute left-3 top-3">
           {hasAnyStock ? (
@@ -86,6 +100,12 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
+
+        {safeImageUrls.length > 1 && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-0.5 text-[10px] text-text-muted backdrop-blur-sm">
+            +{safeImageUrls.length - 1} photo{safeImageUrls.length > 2 ? "s" : ""}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -146,9 +166,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto flex items-center gap-2 pt-2">
           <span className="text-base font-medium text-text-primary">{formatPrice(prix)}</span>
           {selectedVariant && (
-            <span className="text-xs text-text-muted">
-              ({selectedVariant.stock} en stock)
-            </span>
+            <span className="text-xs text-text-muted">({selectedVariant.stock} en stock)</span>
           )}
         </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { fetchProducts, createProduct, updateProduct, deleteProduct } from "@/lib/api";
+import { fetchProducts, createProduct, updateProduct, deleteProduct, uploadImages } from "@/lib/api";
 import { Product } from "@/types/product";
 import { TAILLES, COULEURS } from "@/lib/variants";
 
@@ -11,7 +11,6 @@ const emptyForm = {
   nom: "",
   description: "",
   prix: "",
-  imageUrl: "",
 };
 
 function variantKey(couleur: string, taille: string) {
@@ -30,6 +29,8 @@ export default function AdminProduitsPage() {
   const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
   const [selectedTailles, setSelectedTailles] = useState<string[]>([]);
   const [stocks, setStocks] = useState<Record<string, string>>({});
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   async function loadProducts() {
     setLoading(true);
@@ -57,6 +58,7 @@ export default function AdminProduitsPage() {
     setEditingId(null);
     setForm(emptyForm);
     resetVariantSelection();
+    setImageUrls([]);
     setShowForm(true);
   }
 
@@ -66,7 +68,6 @@ export default function AdminProduitsPage() {
       nom: product.nom,
       description: product.description || "",
       prix: String(product.prix),
-      imageUrl: product.imageUrl || "",
     });
 
     const couleurs = Array.from(new Set(product.variants.map((v) => v.couleur)));
@@ -79,6 +80,7 @@ export default function AdminProduitsPage() {
     setSelectedCouleurs(couleurs);
     setSelectedTailles(tailles);
     setStocks(newStocks);
+    setImageUrls(product.imageUrls || []);
     setShowForm(true);
   }
 
@@ -96,6 +98,27 @@ export default function AdminProduitsPage() {
 
   function updateStock(couleur: string, taille: string, value: string) {
     setStocks((prev) => ({ ...prev, [variantKey(couleur, taille)]: value }));
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setError("");
+    try {
+      const urls = await uploadImages(Array.from(files));
+      setImageUrls((prev) => [...prev, ...urls]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'upload des photos");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  function removeImageUrl(index: number) {
+    setImageUrls((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -121,7 +144,7 @@ export default function AdminProduitsPage() {
       nom: form.nom,
       description: form.description || undefined,
       prix: Number(form.prix),
-      imageUrl: form.imageUrl || undefined,
+      imageUrls,
       variants,
     };
 
@@ -198,28 +221,62 @@ export default function AdminProduitsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block text-sm text-text-muted">Prix (€)</label>
+            <div>
+              <label className="mb-1 block text-sm text-text-muted">Prix (€)</label>
+              <input
+                required
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.prix}
+                onChange={(e) => setForm({ ...form, prix: e.target.value })}
+                className="w-full max-w-xs rounded-lg border border-white/10 bg-void px-3 py-2 text-text-primary outline-none focus:border-lamp/50"
+              />
+            </div>
+
+            {/* Photos multiples — import réel de fichiers */}
+            <div>
+              <label className="mb-2 block text-sm text-text-muted">Photos du produit</label>
+
+              {imageUrls.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-3">
+                  {imageUrls.map((url, i) => (
+                    <div key={i} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-20 w-20 rounded-lg border border-white/10 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImageUrl(i)}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white transition hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <label
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm transition ${
+                  uploading
+                    ? "cursor-not-allowed border-white/10 text-text-muted"
+                    : "border-white/20 text-text-muted hover:border-lamp/50 hover:text-text-primary"
+                }`}
+              >
+                {uploading ? "Envoi en cours..." : "+ Importer des photos"}
                 <input
-                  required
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.prix}
-                  onChange={(e) => setForm({ ...form, prix: e.target.value })}
-                  className="w-full rounded-lg border border-white/10 bg-void px-3 py-2 text-text-primary outline-none focus:border-lamp/50"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  disabled={uploading}
+                  className="hidden"
                 />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-text-muted">URL de l&apos;image</label>
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-white/10 bg-void px-3 py-2 text-text-primary outline-none focus:border-lamp/50"
-                />
-              </div>
+              </label>
             </div>
 
             {/* Sélection multi-couleurs */}
@@ -328,7 +385,7 @@ export default function AdminProduitsPage() {
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || uploading}
                 className="rounded-full bg-lamp px-5 py-2 text-sm font-medium text-void transition hover:bg-lamp-soft disabled:opacity-50"
               >
                 {saving ? "Enregistrement..." : "Enregistrer"}
@@ -353,9 +410,19 @@ export default function AdminProduitsPage() {
             {products.map((product) => (
               <div key={product.id} className="rounded-lg border border-white/10 bg-surface p-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-display text-lg text-text-primary">{product.nom}</p>
-                    <p className="text-sm text-text-muted">{product.prix} €</p>
+                  <div className="flex items-center gap-3">
+                    {product.imageUrls && product.imageUrls.length > 0 && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={product.imageUrls[0]}
+                        alt=""
+                        className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                      />
+                    )}
+                    <div>
+                      <p className="font-display text-lg text-text-primary">{product.nom}</p>
+                      <p className="text-sm text-text-muted">{product.prix} €</p>
+                    </div>
                   </div>
                   <div>
                     <button
