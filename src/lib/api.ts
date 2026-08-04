@@ -1,5 +1,8 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
+const API_URL =
+  typeof window === "undefined"
+    ? process.env.INTERNAL_API_URL || "http://backend:3000"
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    
 async function apiFetch(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,

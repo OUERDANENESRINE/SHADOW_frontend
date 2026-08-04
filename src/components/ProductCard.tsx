@@ -16,6 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0);
 
   const couleursDisponibles = useMemo(
     () => Array.from(new Set(safeVariants.map((v: ProductVariant) => v.couleur))),
@@ -51,6 +52,18 @@ export default function ProductCard({ product }: { product: Product }) {
     setTimeout(() => setAdded(false), 1500);
   }
 
+  function nextImage(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImage((prev) => (prev + 1) % safeImageUrls.length);
+  }
+
+  function prevImage(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImage((prev) => (prev - 1 + safeImageUrls.length) % safeImageUrls.length);
+  }
+
   return (
     <article
       className={`group relative flex flex-col overflow-hidden rounded-lg border transition-all duration-300 ${
@@ -61,14 +74,55 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-gradient-to-b from-[#181a1f] to-[#0e0f13]">
         {safeImageUrls.length > 0 ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={safeImageUrls[0]}
-            alt={nom}
-            className={`h-full w-full object-cover transition-opacity ${
-              hasAnyStock ? "opacity-100" : "opacity-40 grayscale"
-            }`}
-          />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={safeImageUrls[currentImage]}
+              alt={nom}
+              className={`h-full w-full object-cover transition-opacity ${
+                hasAnyStock ? "opacity-100" : "opacity-40 grayscale"
+              }`}
+            />
+
+            {safeImageUrls.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-text-primary opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+                  aria-label="Photo précédente"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-text-primary opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+                  aria-label="Photo suivante"
+                >
+                  ›
+                </button>
+
+                <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                  {safeImageUrls.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentImage(i);
+                      }}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === currentImage ? "w-4 bg-lamp" : "w-1.5 bg-white/40"
+                      }`}
+                      aria-label={`Photo ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <svg
             viewBox="0 0 100 100"
@@ -100,12 +154,6 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-
-        {safeImageUrls.length > 1 && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-0.5 text-[10px] text-text-muted backdrop-blur-sm">
-            +{safeImageUrls.length - 1} photo{safeImageUrls.length > 2 ? "s" : ""}
-          </span>
-        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">

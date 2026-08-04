@@ -235,7 +235,7 @@ export default function AdminCommandesPage() {
                     >
                       {STATUTS.find((s) => s.value === order.statut)?.label}
                     </span>
-                    <span className="text-text-primary">{order.total} €</span>
+                    <span className="text-text-primary">{order.total} DZD</span>
                   </div>
                 </button>
 
@@ -268,7 +268,7 @@ export default function AdminCommandesPage() {
                       {order.items.map((item) => (
                         <li key={item.id}>
                           {item.quantite} × {item.variant?.product?.nom} (
-                          {item.variant?.couleur}/{item.variant?.taille}) — {item.prixUnitaire} €
+                          {item.variant?.couleur}/{item.variant?.taille}) — {item.prixUnitaire} DZD
                         </li>
                       ))}
                     </ul>

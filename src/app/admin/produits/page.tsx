@@ -222,7 +222,7 @@ export default function AdminProduitsPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-text-muted">Prix (€)</label>
+              <label className="mb-1 block text-sm text-text-muted">Prix (DZD)</label>
               <input
                 required
                 type="number"
@@ -421,7 +421,7 @@ export default function AdminProduitsPage() {
                     )}
                     <div>
                       <p className="font-display text-lg text-text-primary">{product.nom}</p>
-                      <p className="text-sm text-text-muted">{product.prix} €</p>
+                      <p className="text-sm text-text-muted">{product.prix} DZD </p>
                     </div>
                   </div>
                   <div>
