@@ -68,3 +68,15 @@ body {
     animation: none;
   }
 }
+
+
+@font-face {
+  font-family: "Biloved Script";
+  src: url("/fonts/Beloved Script.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-biloved {
+  font-family: "Biloved Script", cursive;
+}

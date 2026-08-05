@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import NightSky from "@/components/NightSky";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -31,8 +32,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-void px-6">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center px-6">
+      <NightSky />
+
+      <div className="relative z-10 w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="font-display text-2xl tracking-[0.3em] text-text-primary">
             SHADOW
@@ -54,7 +57,7 @@ export default function RegisterPage() {
               required
               value={nom}
               onChange={(e) => setNom(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-text-primary outline-none transition focus:border-lamp/50"
+              className="w-full rounded-lg border border-white/10 bg-surface/80 px-4 py-2.5 text-text-primary outline-none backdrop-blur-sm transition focus:border-lamp/50"
               placeholder="Votre nom"
             />
           </div>
@@ -66,7 +69,7 @@ export default function RegisterPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-text-primary outline-none transition focus:border-lamp/50"
+              className="w-full rounded-lg border border-white/10 bg-surface/80 px-4 py-2.5 text-text-primary outline-none backdrop-blur-sm transition focus:border-lamp/50"
               placeholder="vous@exemple.com"
             />
           </div>
@@ -79,7 +82,7 @@ export default function RegisterPage() {
               minLength={6}
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-surface px-4 py-2.5 text-text-primary outline-none transition focus:border-lamp/50"
+              className="w-full rounded-lg border border-white/10 bg-surface/80 px-4 py-2.5 text-text-primary outline-none backdrop-blur-sm transition focus:border-lamp/50"
               placeholder="6 caractères minimum"
             />
           </div>
