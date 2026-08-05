@@ -2,7 +2,7 @@ const API_URL =
   typeof window === "undefined"
     ? process.env.INTERNAL_API_URL || "http://backend:3000"
     : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    
+
 async function apiFetch(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -59,6 +59,25 @@ export async function updateProduct(id: number, data: Partial<ProductInput>) {
 
 export async function deleteProduct(id: number) {
   return apiFetch(`/products/${id}`, { method: "DELETE" });
+}
+
+export async function uploadImages(files: File[]): Promise<string[]> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+
+  const res = await fetch(`${API_URL}/uploads`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "Erreur lors de l'upload" }));
+    throw new Error(error.message || "Erreur lors de l'upload");
+  }
+
+  const data = await res.json();
+  return data.urls;
 }
 
 // --- Auth ---
@@ -130,23 +149,4 @@ export async function fetchNotifications() {
 
 export async function markNotificationRead(id: number) {
   return apiFetch(`/notifications/${id}/lue`, { method: "PATCH" });
-}
-
-export async function uploadImages(files: File[]): Promise<string[]> {
-  const formData = new FormData();
-  files.forEach((file) => formData.append("files", file));
-
-  const res = await fetch(`${API_URL}/uploads`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: "Erreur lors de l'upload" }));
-    throw new Error(error.message || "Erreur lors de l'upload");
-  }
-
-  const data = await res.json();
-  return data.urls.map((url: string) => `${API_URL}${url}`);
 }

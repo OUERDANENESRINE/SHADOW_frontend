@@ -6,7 +6,7 @@ import { getColorHex } from "@/lib/variants";
 import { useCart } from "@/context/CartContext";
 
 function formatPrice(value: number) {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
+  return `${value.toLocaleString("fr-FR")} DA`;
 }
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -213,9 +213,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className="mt-auto flex items-center gap-2 pt-2">
           <span className="text-base font-medium text-text-primary">{formatPrice(prix)}</span>
-          {selectedVariant && (
-            <span className="text-xs text-text-muted">({selectedVariant.stock} en stock)</span>
-          )}
+          
         </div>
 
         <button

@@ -10,7 +10,7 @@ import { createOrder } from "@/lib/api";
 import { getColorHex } from "@/lib/variants";
 
 function formatPrice(value: number) {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
+  return `${value.toLocaleString("fr-FR")} DA`;
 }
 
 export default function PanierPage() {
