@@ -4,14 +4,18 @@ import { useMemo, useState } from "react";
 import { Product } from "@/types/product";
 import ProductCard from "./ProductCard";
 
+function hasStock(product: Product): boolean {
+  return (product.variants || []).some((v) => v.stock > 0);
+}
+
 export default function ProductGrid({ products }: { products: Product[] }) {
   const [showOnlyInStock, setShowOnlyInStock] = useState(false);
 
   const filtered = useMemo(() => {
-    return products.filter((p) => !showOnlyInStock || p.stock > 0);
+    return products.filter((p) => !showOnlyInStock || hasStock(p));
   }, [products, showOnlyInStock]);
 
-  const inStockCount = products.filter((p) => p.stock > 0).length;
+  const inStockCount = products.filter((p) => hasStock(p)).length;
 
   return (
     <section id="collection" className="bg-void px-6 py-20 sm:px-10">
