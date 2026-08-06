@@ -57,7 +57,7 @@ export default function Header() {
 </Link>
 
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/shadow_.brand?utm_source=qr"
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-text-muted transition hover:border-lamp/50 hover:text-lamp-soft"
