@@ -102,8 +102,10 @@ export default function AdminCommandesPage() {
   return (
     <ProtectedRoute requireAdmin>
       <AdminLayout>
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-3xl tracking-wide text-text-primary">Commandes</h1>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="font-display text-2xl tracking-wide text-text-primary sm:text-3xl">
+            Commandes
+          </h1>
           <button
             onClick={() => setShowForm(!showForm)}
             className="rounded-full bg-lamp px-5 py-2 text-sm font-medium text-void transition hover:bg-lamp-soft"
@@ -115,7 +117,7 @@ export default function AdminCommandesPage() {
         {showForm && (
           <form
             onSubmit={handleCreateOrder}
-            className="mb-8 rounded-lg border border-white/10 bg-surface p-6"
+            className="mb-8 rounded-lg border border-white/10 bg-surface p-4 sm:p-6"
           >
             <h2 className="mb-4 font-display text-xl text-text-primary">Commande en boutique</h2>
 
@@ -136,16 +138,16 @@ export default function AdminCommandesPage() {
               />
             </div>
 
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="mb-4 flex flex-col gap-3">
               <label className="mb-1 block text-sm text-text-muted">
                 Produits (variante précise)
               </label>
               {lines.map((line, i) => (
-                <div key={i} className="flex items-center gap-2">
+                <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <select
                     value={line.variantId}
                     onChange={(e) => updateLine(i, "variantId", Number(e.target.value))}
-                    className="flex-1 rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
+                    className="w-full rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50 sm:flex-1"
                   >
                     <option value={0}>Sélectionner une variante</option>
                     {products.flatMap((p) =>
@@ -156,22 +158,24 @@ export default function AdminCommandesPage() {
                       )),
                     )}
                   </select>
-                  <input
-                    type="number"
-                    min={1}
-                    value={line.quantite}
-                    onChange={(e) => updateLine(i, "quantite", Number(e.target.value))}
-                    className="w-20 rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
-                  />
-                  {lines.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeLine(i)}
-                      className="text-sm text-red-400 hover:underline"
-                    >
-                      Retirer
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      value={line.quantite}
+                      onChange={(e) => updateLine(i, "quantite", Number(e.target.value))}
+                      className="w-20 rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
+                    />
+                    {lines.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeLine(i)}
+                        className="text-sm text-red-400 hover:underline"
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               <button
@@ -183,7 +187,7 @@ export default function AdminCommandesPage() {
               </button>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
                 disabled={saving}
@@ -215,9 +219,9 @@ export default function AdminCommandesPage() {
               >
                 <button
                   onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
-                  className="flex w-full items-center justify-between px-5 py-4 text-left"
+                  className="flex w-full flex-col gap-2 px-4 py-4 text-left sm:flex-row sm:items-center sm:justify-between sm:px-5"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="font-display text-lg text-text-primary">#{order.id}</span>
                     <span className="text-sm text-text-muted">
                       {order.user
@@ -240,23 +244,23 @@ export default function AdminCommandesPage() {
                 </button>
 
                 {expandedId === order.id && (
-                  <div className="border-t border-white/10 px-5 py-4">
+                  <div className="border-t border-white/10 px-4 py-4 sm:px-5">
                     {(order.clientNom || order.telephone || order.adresse) && (
                       <div className="mb-4 rounded-lg border border-white/10 bg-void/50 p-3 text-sm">
                         {order.clientNom && (
-                          <p className="text-text-primary">
+                          <p className="break-words text-text-primary">
                             <span className="text-text-muted">Nom : </span>
                             {order.clientNom}
                           </p>
                         )}
                         {order.telephone && (
-                          <p className="text-text-primary">
+                          <p className="break-words text-text-primary">
                             <span className="text-text-muted">Téléphone : </span>
                             {order.telephone}
                           </p>
                         )}
                         {order.adresse && (
-                          <p className="text-text-primary">
+                          <p className="break-words text-text-primary">
                             <span className="text-text-muted">Adresse : </span>
                             {order.adresse}
                           </p>
@@ -266,7 +270,7 @@ export default function AdminCommandesPage() {
 
                     <ul className="mb-4 flex flex-col gap-1 text-sm text-text-muted">
                       {order.items.map((item) => (
-                        <li key={item.id}>
+                        <li key={item.id} className="break-words">
                           {item.quantite} × {item.variant?.product?.nom} (
                           {item.variant?.couleur}/{item.variant?.taille}) — {item.prixUnitaire} DZD
                         </li>
@@ -281,7 +285,7 @@ export default function AdminCommandesPage() {
                       onChange={(e) =>
                         handleStatusChange(order.id, e.target.value as OrderStatus)
                       }
-                      className="rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50"
+                      className="w-full rounded-lg border border-white/10 bg-void px-3 py-2 text-sm text-text-primary outline-none focus:border-lamp/50 sm:w-auto"
                     >
                       {STATUTS.map((s) => (
                         <option key={s.value} value={s.value}>

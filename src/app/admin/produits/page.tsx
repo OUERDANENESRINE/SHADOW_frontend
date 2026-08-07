@@ -176,15 +176,17 @@ export default function AdminProduitsPage() {
   return (
     <ProtectedRoute requireAdmin>
       <AdminLayout>
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-3xl tracking-wide text-text-primary">Produits</h1>
-          <button
-            onClick={openCreateForm}
-            className="rounded-full bg-lamp px-5 py-2 text-sm font-medium text-void transition hover:bg-lamp-soft"
-          >
-            + Ajouter un produit
-          </button>
-        </div>
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <h1 className="font-display text-2xl tracking-wide text-text-primary sm:text-3xl">
+    Produits
+  </h1>
+  <button
+    onClick={openCreateForm}
+    className="rounded-full bg-lamp px-5 py-2 text-sm font-medium text-void transition hover:bg-lamp-soft"
+  >
+    + Ajouter un produit
+  </button>
+</div>
 
         {error && (
           <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400">
@@ -222,17 +224,17 @@ export default function AdminProduitsPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-text-muted">Prix (DZD)</label>
-              <input
-                required
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.prix}
-                onChange={(e) => setForm({ ...form, prix: e.target.value })}
-                className="w-full max-w-xs rounded-lg border border-white/10 bg-void px-3 py-2 text-text-primary outline-none focus:border-lamp/50"
-              />
-            </div>
+  <label className="mb-1 block text-sm text-text-muted">Prix (DZD)</label>
+  <input
+    required
+    type="number"
+    step="0.01"
+    min="0"
+    value={form.prix}
+    onChange={(e) => setForm({ ...form, prix: e.target.value })}
+    className="w-full rounded-lg border border-white/10 bg-void px-3 py-2 text-text-primary outline-none focus:border-lamp/50 sm:max-w-xs"
+  />
+</div>
 
             {/* Photos multiples — import réel de fichiers */}
             <div>
@@ -409,52 +411,50 @@ export default function AdminProduitsPage() {
           <div className="flex flex-col gap-3">
             {products.map((product) => (
               <div key={product.id} className="rounded-lg border border-white/10 bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {product.imageUrls && product.imageUrls.length > 0 && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={product.imageUrls[0]}
-                        alt=""
-                        className="h-12 w-12 rounded-lg border border-white/10 object-cover"
-                      />
-                    )}
-                    <div>
-                      <p className="font-display text-lg text-text-primary">{product.nom}</p>
-                      <p className="text-sm text-text-muted">{product.prix} DZD </p>
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => openEditForm(product)}
-                      className="mr-3 text-sm text-lamp-soft hover:underline"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="text-sm text-red-400 hover:underline"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex items-center gap-3">
+      {product.imageUrls && product.imageUrls.length > 0 && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={product.imageUrls[0]}
+          alt=""
+          className="h-12 w-12 shrink-0 rounded-lg border border-white/10 object-cover"
+        />
+      )}
+      <div>
+        <p className="font-display text-lg text-text-primary">{product.nom}</p>
+        <p className="text-sm text-text-muted">{product.prix} DZD</p>
+      </div>
+    </div>
+    <div className="flex gap-3 sm:shrink-0">
+      <button
+        onClick={() => openEditForm(product)}
+        className="text-sm text-lamp-soft hover:underline"
+      >
+        Modifier
+      </button>
+      <button
+        onClick={() => handleDelete(product.id)}
+        className="text-sm text-red-400 hover:underline"
+      >
+        Supprimer
+      </button>
+    </div>
+  </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {product.variants.map((v) => (
-                    <span
-                      key={v.id}
-                      className={`rounded-full border px-2.5 py-1 text-xs ${
-                        v.stock > 0
-                          ? "border-white/10 text-text-muted"
-                          : "border-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {v.couleur} / {v.taille} — {v.stock}
-                    </span>
-                  ))}
-                </div>
-              </div>
+  <div className="mt-3 flex flex-wrap gap-2">
+    {product.variants.map((v) => (
+      <span
+        key={v.id}
+        className={`rounded-full border px-2.5 py-1 text-xs ${
+          v.stock > 0 ? "border-white/10 text-text-muted" : "border-red-500/20 text-red-400"
+        }`}
+      >
+        {v.couleur} / {v.taille} — {v.stock}
+      </span>
+    ))}
+  </div>
+</div>
             ))}
           </div>
         )}
