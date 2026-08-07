@@ -23,12 +23,10 @@ export default function Header() {
                     href="/admin/produits"
                     className="text-sm tracking-wide text-lamp-soft hover:underline"
                   >
-                    Espace admin
+                    admin
                   </Link>
                 )}
-                <span className="text-sm text-text-muted">
-                  {user.nom || user.email}
-                </span>
+                
                 <button
                   onClick={() => logout()}
                   className="text-sm tracking-wide text-text-muted transition hover:text-lamp-soft"
